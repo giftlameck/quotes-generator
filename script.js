@@ -32,44 +32,51 @@ const themeToggle = document.getElementById('theme-toggle');
 // Function to fetch quotes from multiple APIs
 async function fetchQuote(category = 'all') {
     try {
-        // Choose a random API endpoint
-        const endpoints = Object.values(API_ENDPOINTS);
-        const randomEndpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+        // Try each API endpoint until we get a successful response
+        for (const endpoint of Object.values(API_ENDPOINTS)) {
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) continue;
+
+                const data = await response.json();
+                
+                // Handle different API response formats
+                let quote = null;
+                if (endpoint === API_ENDPOINTS.quoteGarden) {
+                    quote = data.data[0];
+                } else if (endpoint === API_ENDPOINTS.typeFit) {
+                    quote = data;
+                } else if (endpoint === API_ENDPOINTS.zenQuotes) {
+                    quote = data[0];
+                }
+
+                if (quote) {
+                    // Normalize the quote data
+                    const normalizedQuote = {
+                        text: quote.quote || quote.content || quote.text || quote.body,
+                        author: quote.author || quote.author || quote.author || 'Unknown'
+                    };
+
+                    // Add to cache
+                    if (quoteCache[category]) {
+                        quoteCache[category].push(normalizedQuote);
+                    }
+
+                    return normalizedQuote;
+                }
+            } catch (error) {
+                console.error(`Error fetching from ${endpoint}:`, error);
+            }
+        }
         
-        // Make the API request
-        const response = await fetch(randomEndpoint);
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch quote');
-        }
-
-        const data = await response.json();
-        
-        // Normalize the quote data from different APIs
-        let quote = null;
-        if (randomEndpoint === API_ENDPOINTS.quoteGarden) {
-            quote = data.data[0];
-        } else if (randomEndpoint === API_ENDPOINTS.typeFit) {
-            quote = data;
-        } else if (randomEndpoint === API_ENDPOINTS.zenQuotes) {
-            quote = data[0];
-        } else if (randomEndpoint === API_ENDPOINTS.dummy) {
-            quote = data[0];
-        }
-
-        // Add to cache
-        if (quote && quoteCache[category]) {
-            quoteCache[category].push({
-                text: quote.quote || quote.content || quote.text,
-                author: quote.author || quote.author || 'Unknown'
-            });
-        }
-
-        return quote;
+        throw new Error('Failed to fetch quote from all APIs');
     } catch (error) {
         console.error('Error fetching quote:', error);
-        // If one API fails, try another
-        return fetchQuote(category);
+        // Return a default quote if all APIs fail
+        return {
+            text: "The only way to do great work is to love what you do.",
+            author: "Steve Jobs"
+        };
     }
 }
 
