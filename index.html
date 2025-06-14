@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motivational Quotes Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Motivational Quotes Generator</h1>
+        
+        <div class="quote-box">
+            <div id="quote-text" class="quote-text"></div>
+            <div id="quote-author" class="quote-author"></div>
+        </div>
+
+        <div class="controls">
+            <button id="new-quote" class="btn">New Quote</button>
+            <button id="copy-quote" class="btn">Copy Quote</button>
+        </div>
+
+        <div class="categories">
+            <button class="category-btn active" data-category="all">All</button>
+            <button class="category-btn" data-category="success">Success</button>
+            <button class="category-btn" data-category="life">Life</button>
+            <button class="category-btn" data-category="fitness">Fitness</button>
+        </div>
+
+        <div class="theme-toggle">
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="creator-info">
+                <span class="creator-name">Created with ❤️ by Gift Lameck</span>
+                <a href="mailto:giftlameck94@gmail.com" class="creator-email">
+                    <span class="email-icon">📧</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
