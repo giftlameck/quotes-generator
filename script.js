@@ -43,7 +43,7 @@ async function fetchQuote(category = 'all') {
                 // Handle different API response formats
                 let quote = null;
                 if (endpoint === API_ENDPOINTS.quoteGarden) {
-                    quote = data.data[0];
+                    quote = data.data && data.data[0];
                 } else if (endpoint === API_ENDPOINTS.typeFit) {
                     quote = data;
                 } else if (endpoint === API_ENDPOINTS.zenQuotes) {
@@ -53,8 +53,8 @@ async function fetchQuote(category = 'all') {
                 if (quote) {
                     // Normalize the quote data
                     const normalizedQuote = {
-                        text: quote.quote || quote.content || quote.text || quote.body,
-                        author: quote.author || quote.author || quote.author || 'Unknown'
+                        text: quote.quote || quote.content || quote.text || quote.body || 'Unknown quote',
+                        author: quote.author || quote.author || quote.author || quote.author_name || 'Unknown author'
                     };
 
                     // Add to cache
@@ -110,10 +110,22 @@ function showQuote(quote) {
 
 // Add event listeners
 newQuoteBtn.addEventListener('click', async () => {
+    console.log('New quote button clicked');
     const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+    console.log('Active category:', activeCategory);
     const quote = await getQuote(activeCategory);
+    console.log('Received quote:', quote);
     showQuote(quote);
 });
+
+// Add debug logging to the showQuote function
+function showQuote(quote) {
+    console.log('Showing quote:', quote);
+    if (quote) {
+        quoteText.textContent = quote.text;
+        quoteAuthor.textContent = `- ${quote.author}`;
+    }
+}
 
 copyQuoteBtn.addEventListener('click', () => {
     const quote = `${quoteText.textContent}\n- ${quoteAuthor.textContent}`;
