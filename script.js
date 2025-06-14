@@ -1,8 +1,31 @@
 // API endpoints for quotes
 const API_ENDPOINTS = {
     quoteGarden: 'https://quote-garden.onrender.com/api/v3/quotes/random',
-    typeFit: 'https://api.quotable.io/random',
-    zenQuotes: 'https://zenquotes.io/api/random'
+    typeFit: 'https://api.quotable.io/random'
+};
+
+// Local fallback quotes
+const LOCAL_QUOTES = {
+    all: [
+        { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+        { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+        { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+        { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+        { text: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
+        { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" }
+    ],
+    success: [
+        { text: "Success is walking from failure to failure with no loss of enthusiasm.", author: "Winston Churchill" },
+        { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" }
+    ],
+    life: [
+        { text: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
+        { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" }
+    ],
+    fitness: [
+        { text: "The only bad workout is the one that didn't happen.", author: "Unknown" },
+        { text: "Fitness is not about being better than someone else. It's about being better than you used to be.", author: "Unknown" }
+    ]
 };
 
 // Categories mapping for API filtering
@@ -35,8 +58,17 @@ async function fetchQuote(category = 'all') {
         // Try each API endpoint until we get a successful response
         for (const endpoint of Object.values(API_ENDPOINTS)) {
             try {
-                const response = await fetch(endpoint);
-                if (!response.ok) continue;
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.log(`API response status: ${response.status}`);
+                    continue;
+                }
 
                 const data = await response.json();
                 
@@ -46,8 +78,6 @@ async function fetchQuote(category = 'all') {
                     quote = data.data && data.data[0];
                 } else if (endpoint === API_ENDPOINTS.typeFit) {
                     quote = data;
-                } else if (endpoint === API_ENDPOINTS.zenQuotes) {
-                    quote = data[0];
                 }
 
                 if (quote) {
@@ -69,7 +99,10 @@ async function fetchQuote(category = 'all') {
             }
         }
         
-        throw new Error('Failed to fetch quote from all APIs');
+        // If all APIs fail, fall back to local quotes
+        const localQuotes = LOCAL_QUOTES[category] || LOCAL_QUOTES.all;
+        const randomIndex = Math.floor(Math.random() * localQuotes.length);
+        return localQuotes[randomIndex];
     } catch (error) {
         console.error('Error fetching quote:', error);
         // Return a default quote if all APIs fail
